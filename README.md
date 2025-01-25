@@ -23,4 +23,4 @@ as cognitive computing, natural language understanding, and AI-driven decision-m
 direction in neural computation could bridge the gap between human-like reasoning and machine 
 learning, advancing AI towards more intelligent, explainable, and autonomous systems.
 
-![Image Alt]()
+![Image Alt](https://github.com/HirushiKeshan/Rethinking-Neural-Computation/blob/187dca340345f0bde11e718b77866f83a7d19ea6/UI.png)
