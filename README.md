@@ -22,3 +22,4 @@ to create more robust, adaptive, and generalizable AI models, leading to advance
 as cognitive computing, natural language understanding, and AI-driven decision-making. This new 
 direction in neural computation could bridge the gap between human-like reasoning and machine 
 learning, advancing AI towards more intelligent, explainable, and autonomous systems.
+UI.png
