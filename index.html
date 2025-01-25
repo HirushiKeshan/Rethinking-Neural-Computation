@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rethinking Neural Computation</title>
+    <style>
+        /* General Reset and Styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            height: 100vh;
+            background-image: url('https://wallpaperbat.com/img/166784-artificial-intelligence-background-4k-1920x1080-wallpaper.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Chat Container Styling */
+        #chat-container {
+            width: 90%;
+            max-width: 800px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+        }
+
+        /* Chat Header Styling */
+        #chat-header {
+            padding: 15px;
+            background-color: rgba(204, 250, 23, 0.1);
+            text-align: center;
+            color: #e7f308;
+            font-size: 18px;
+            font-weight: bold;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Chat Messages */
+        #msg-content {
+            height: 55vh;
+            padding: 20px;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        #messages {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 15px;
+            max-width: 75%;
+            line-height: 1.5;
+        }
+
+        /* User and Bot Messages */
+        .user-message {
+            align-self: flex-end;
+            background-color: #4CAF50;
+            color: #fff;
+            box-shadow: 0 5px 20px rgba(76, 175, 80, 0.5);
+        }
+
+        .bot-message {
+            align-self: flex-start;
+            background-color: #12cbe4;
+            color: #000000;
+            box-shadow: 0 5px 20px rgba(255, 0, 0, 0.5);
+        }
+
+        /* Input and Buttons Styling */
+        .btn-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Input Field */
+        #user-input {
+            flex-grow: 1;
+            padding: 12px;
+            border: 2px solid #ccc;
+            border-radius: 25px;
+            outline: none;
+            background-color: rgba(255, 255, 255, 0.3);
+            color: #fff;
+            transition: border-color 0.3s ease-in-out;
+        }
+
+        #user-input::placeholder {
+            color: #ccc;
+        }
+
+        #user-input:focus {
+            border-color: #00d4ff;
+        }
+
+        /* Button Styling */
+        button {
+            padding: 12px 25px;
+            border-radius: 50px;
+            border: none;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            position: relative;
+            overflow: hidden;
+            outline: none; /* Remove default outline */
+            user-select: none; /* Prevent text selection on double click */
+        }
+
+        button:hover {
+            transform: scale(1.05); /* Slightly enlarge on hover */
+        }
+
+        /* Unique Button Colors */
+        #send-btn {
+            background: linear-gradient(135deg, #FF69B4, #FFC0CB);
+            box-shadow: 0 5px 20px rgba(255, 105, 180, 0.5);
+        }
+
+        #view-history-btn {
+            background: linear-gradient(135deg, #2196F3, #64B5F6);
+            box-shadow: 0 5px 20px rgba(33, 150, 243, 0.5);
+        }
+
+        #image-btn {
+            background: linear-gradient(135deg, #4CAF50, #8BC34A);
+            box-shadow: 0 5px 20px rgba(76, 175, 80, 0.5);
+        }
+
+        #upload-btn {
+            background: linear-gradient(135deg, #FF5733, #FF8D1A);
+            box-shadow: 0 5px 20px rgba(255, 87, 51, 0.5);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Chat Container -->
+    <div id="chat-container">
+        <!-- Chat Header -->
+        <div id="chat-header">
+            Rethinking Neural Computation Chat
+        </div>
+        <!-- Chat Messages -->
+        <div id="msg-content">
+            <div id="messages">
+                <!-- Messages will be displayed here -->
+            </div>
+        </div>
+        <!-- Input and Buttons -->
+        <div class="btn-inputs">
+            <input type="text" id="user-input" placeholder="Type a message..." aria-label="User input message">
+            <button id="send-btn" aria-label="Send message">Send</button>
+            <button id="view-history-btn" aria-label="View message history">View History</button>
+            <button id="image-btn" aria-label="Add image to chat">Add Image</button>
+            <label for="upload-input" class="upload-label">
+                <button id="upload-btn" aria-label="Upload an image">Upload</button>
+            </label>
+            <input type="file" id="upload-input" style="display: none;" accept="image/*">
+        </div>
+    </div>
+    <script>
+        document.getElementById('send-btn').addEventListener('click', function () {
+            const userInput = document.getElementById('user-input');
+            const message = userInput.value;
+
+            if (message.trim() !== '') {
+                displayMessage(message, 'user-message');
+                userInput.value = ''; // Clear the input field
+
+                // Send message to the Flask backend
+                fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: message })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.response) {
+                            displayMessage(data.response, 'bot-message');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            }
+        });
+
+        document.getElementById('view-history-btn').addEventListener('click', function () {
+            fetch('/history')
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(item => {
+                        displayMessage(`User: ${item.query}`, 'user-message');
+                        displayMessage(`Bot: ${item.response}`, 'bot-message');
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching history:', error);
+                });
+        });
+
+        document.getElementById('upload-input').addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            if (file) {
+                displayMessage(`Uploaded file: ${file.name}`, 'user-message');
+
+                // Handle file upload to the backend
+                const formData = new FormData();
+                formData.append('image', file);
+
+                fetch('/extract-text', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.extracted_text) {
+                            displayMessage(`Extracted text: ${data.extracted_text}`, 'bot-message');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Upload Error:', error);
+                    });
+            }
+        });
+
+        function displayMessage(text, className) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', className);
+            messageDiv.textContent = text;
+
+            const messagesContainer = document.getElementById('messages');
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight; // Scroll to the latest message
+        }
+    </script>
+</body>
+
+</html>
